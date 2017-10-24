@@ -15,6 +15,11 @@
  * It always throws.
  */
 
+ /**
+  * 根据传入的code，报错异常，并给出异常类型所对应的线上链接
+  * 
+  * @param {any} code 
+  */
 function reactProdInvariant(code) {
   var argCount = arguments.length - 1;
 

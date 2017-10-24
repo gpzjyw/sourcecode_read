@@ -20,6 +20,7 @@ var lowPriorityWarning = require('./lowPriorityWarning');
 
 /**
  * Base class helpers for the updating state of a component.
+ * 定义基类函数，首先声明各类属性，而后定义各类原型属性/函数
  */
 function ReactComponent(props, context, updater) {
   this.props = props;
@@ -56,6 +57,7 @@ ReactComponent.prototype.isReactComponent = {};
  * @param {?function} callback Called after state is updated.
  * @final
  * @protected
+ * setState函数，传入需要更新的状态，以及状态更新完毕后执行的回调函数
  */
 ReactComponent.prototype.setState = function (partialState, callback) {
   !(typeof partialState === 'object' || typeof partialState === 'function' || partialState == null) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'setState(...): takes an object of state variables to update or a function which returns an object of state variables.') : _prodInvariant('85') : void 0;

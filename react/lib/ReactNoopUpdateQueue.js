@@ -10,6 +10,11 @@
 
 var warning = require('fbjs/lib/warning');
 
+/**
+ * 非生产环境时，提供详细的报错信息
+ * @param {*} publicInstance 
+ * @param {*} callerName 
+ */
 function warnNoop(publicInstance, callerName) {
   if (process.env.NODE_ENV !== 'production') {
     var constructor = publicInstance.constructor;
@@ -27,6 +32,7 @@ var ReactNoopUpdateQueue = {
    * @return {boolean} True if mounted, false otherwise.
    * @protected
    * @final
+   * 检查组件是否已经装载完成
    */
   isMounted: function (publicInstance) {
     return false;
@@ -39,6 +45,7 @@ var ReactNoopUpdateQueue = {
    * @param {ReactClass} publicInstance The instance to use as `this` context.
    * @param {?function} callback Called after state is updated.
    * @internal
+   * 当所有状态更新完成后，将回调函数放入到执行队列中
    */
   enqueueCallback: function (publicInstance, callback) {},
 
@@ -54,6 +61,9 @@ var ReactNoopUpdateQueue = {
    *
    * @param {ReactClass} publicInstance The instance that should rerender.
    * @internal
+   * 强制触发更新
+   * 会调用生命周期函数componentWillUpdate和componentDidUpdate
+   * 不会调用shouldComponentUpdate
    */
   enqueueForceUpdate: function (publicInstance) {
     warnNoop(publicInstance, 'forceUpdate');
@@ -69,6 +79,8 @@ var ReactNoopUpdateQueue = {
    * @param {ReactClass} publicInstance The instance that should rerender.
    * @param {object} completeState Next state.
    * @internal
+   * 更换所有的state，但不能保证state会立刻更新
+   * 所以，执行这个方法后立刻获取state值，依然可能获得旧的值
    */
   enqueueReplaceState: function (publicInstance, completeState) {
     warnNoop(publicInstance, 'replaceState');
@@ -83,6 +95,8 @@ var ReactNoopUpdateQueue = {
    * @param {ReactClass} publicInstance The instance that should rerender.
    * @param {object} partialState Next partial state to be merged with state.
    * @internal
+   * 为state设置一个分组
+   * _pendingState是一个内部属性，该函数提供了一个折中的策略。？？？
    */
   enqueueSetState: function (publicInstance, partialState) {
     warnNoop(publicInstance, 'setState');

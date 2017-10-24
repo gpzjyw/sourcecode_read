@@ -23,13 +23,18 @@
  */
 
 var lowPriorityWarning = function () {};
-
+/**
+ * 非生产环境下，定义报错函数，使用console或者throw提示报错信息
+ */
 if (process.env.NODE_ENV !== 'production') {
   var printWarning = function (format) {
     for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
       args[_key - 1] = arguments[_key];
     }
 
+    /**
+     * 运用正则匹配字符串中的所有%s，并用传入的参数进行替换
+     */
     var argIndex = 0;
     var message = 'Warning: ' + format.replace(/%s/g, function () {
       return args[argIndex++];
