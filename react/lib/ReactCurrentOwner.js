@@ -14,6 +14,7 @@
  *
  * The current owner is the component who should own any components that are
  * currently being constructed.
+ * 当前的owner是正在被创建的组件???
  */
 var ReactCurrentOwner = {
   /**

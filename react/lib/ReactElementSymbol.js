@@ -11,6 +11,7 @@
 
 // The Symbol used to tag the ReactElement type. If there is no native Symbol
 // nor polyfill, then a plain number is used for performance.
+// Symbol用于标识React元素的类型，如果Symbol不存在，则用数字标识
 
 var REACT_ELEMENT_TYPE = typeof Symbol === 'function' && Symbol['for'] && Symbol['for']('react.element') || 0xeac7;
 

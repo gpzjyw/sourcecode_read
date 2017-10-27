@@ -28,6 +28,7 @@ function ReactComponent(props, context, updater) {
   this.refs = emptyObject;
   // We initialize the default updater but the real one gets injected by the
   // renderer.
+  // 此处初始化默认的updater，真正的updater的值在renderer中写入
   this.updater = updater || ReactNoopUpdateQueue;
 }
 
@@ -80,6 +81,8 @@ ReactComponent.prototype.setState = function (partialState, callback) {
  * @param {?function} callback Called after update is complete.
  * @final
  * @protected
+ * 强制执行一次更新，并添加回调函数
+ * 不会调用shouldComponentUpdate，但会调用componentWillUpdate和componentDidUpdate
  */
 ReactComponent.prototype.forceUpdate = function (callback) {
   this.updater.enqueueForceUpdate(this);
@@ -92,6 +95,7 @@ ReactComponent.prototype.forceUpdate = function (callback) {
  * Deprecated APIs. These APIs used to exist on classic React classes but since
  * we would like to deprecate them, we're not going to move them over to this
  * modern base class. Instead, we define a getter that warns if it's accessed.
+ * 针对要移除的isMounted和replaceState，定义这些对象的访问器属性，给出警告信息
  */
 if (process.env.NODE_ENV !== 'production') {
   var deprecatedAPIs = {
@@ -117,6 +121,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 /**
  * Base class helpers for the updating state of a component.
+ * React 纯组件
  */
 function ReactPureComponent(props, context, updater) {
   // Duplicated from ReactComponent.

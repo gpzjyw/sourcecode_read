@@ -18,6 +18,7 @@ var hasOwnProperty = Object.prototype.hasOwnProperty;
 
 var REACT_ELEMENT_TYPE = require('./ReactElementSymbol');
 
+// 定义保留的属性，遍历对象时跳过
 var RESERVED_PROPS = {
   key: true,
   ref: true,
@@ -27,6 +28,7 @@ var RESERVED_PROPS = {
 
 var specialPropKeyWarningShown, specialPropRefWarningShown;
 
+// 判断传入的对象是否
 function hasValidRef(config) {
   if (process.env.NODE_ENV !== 'production') {
     if (hasOwnProperty.call(config, 'ref')) {
@@ -98,6 +100,8 @@ function defineRefPropWarningGetter(props, displayName) {
  * @param {*} owner
  * @param {*} props
  * @internal
+ * React工厂类函数：用于创建React元素
+ * 主要定义了一些基本属性
  */
 var ReactElement = function (type, key, ref, self, source, owner, props) {
   var element = {
@@ -164,6 +168,7 @@ var ReactElement = function (type, key, ref, self, source, owner, props) {
 /**
  * Create and return a new ReactElement of the given type.
  * See https://facebook.github.io/react/docs/top-level-api.html#react.createelement
+ * 根据传入参数创建一个新的ReactElement
  */
 ReactElement.createElement = function (type, config, children) {
   var propName;

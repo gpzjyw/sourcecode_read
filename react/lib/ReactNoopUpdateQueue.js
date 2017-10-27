@@ -79,7 +79,7 @@ var ReactNoopUpdateQueue = {
    * @param {ReactClass} publicInstance The instance that should rerender.
    * @param {object} completeState Next state.
    * @internal
-   * 更换所有的state，但不能保证state会立刻更新
+   * 更新所有state，但不能保证state会立刻更新
    * 所以，执行这个方法后立刻获取state值，依然可能获得旧的值
    */
   enqueueReplaceState: function (publicInstance, completeState) {
@@ -96,7 +96,7 @@ var ReactNoopUpdateQueue = {
    * @param {object} partialState Next partial state to be merged with state.
    * @internal
    * 为state设置一个分组
-   * _pendingState是一个内部属性，该函数提供了一个折中的策略。？？？
+   * _pendingState是一个内部属性，该函数提供了一个折中的策略。???
    */
   enqueueSetState: function (publicInstance, partialState) {
     warnNoop(publicInstance, 'setState');
