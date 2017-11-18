@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * 
+ * 用于构造组件树
  */
 
 'use strict';
@@ -16,6 +16,10 @@ var ReactCurrentOwner = require('./ReactCurrentOwner');
 var invariant = require('fbjs/lib/invariant');
 var warning = require('fbjs/lib/warning');
 
+/**
+ * 判断方法是否是native方法
+ * @param {*} fn 
+ */
 function isNative(fn) {
   // Based on isNative() from Lodash
   var funcToString = Function.prototype.toString;
@@ -24,6 +28,7 @@ function isNative(fn) {
   // Take an example native function source for comparison
   .call(hasOwnProperty
   // Strip regex characters so we can use it for regex
+  // 双反斜杠用于字符串中反斜杠的转义
   ).replace(/[\\^$.*+?()[\]{}|]/g, '\\$&'
   // Remove hasOwnProperty from the template to make it generic
   ).replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$');
@@ -54,6 +59,9 @@ var getItemIDs;
 var addRoot;
 var removeRoot;
 var getRootIDs;
+
+// 利用Map结构存储组件树
+// 利用Set结构存储根节点
 
 if (canUseCollections) {
   var itemMap = new Map();
@@ -123,8 +131,13 @@ if (canUseCollections) {
   };
 }
 
+// 利用Array结构保存需要卸载组件的id
 var unmountedIDs = [];
 
+/**
+ * 移除Map中组件，包括子组件
+ * @param {*} id 
+ */
 function purgeDeep(id) {
   var item = getItem(id);
   if (item) {
@@ -135,10 +148,20 @@ function purgeDeep(id) {
   }
 }
 
+/**
+ * 组件的描述信息：组件名、???、所在行、创建者，用于调试过程中的控制台显示
+ * @param {*} name 
+ * @param {*} source 
+ * @param {*} ownerName 
+ */
 function describeComponentFrame(name, source, ownerName) {
   return '\n    in ' + (name || 'Unknown') + (source ? ' (at ' + source.fileName.replace(/^.*[\\\/]/, '') + ':' + source.lineNumber + ')' : ownerName ? ' (created by ' + ownerName + ')' : '');
 }
 
+/**
+ * 获取元素的显示名称
+ * @param {*} element 
+ */
 function getDisplayName(element) {
   if (element == null) {
     return '#empty';
@@ -151,6 +174,10 @@ function getDisplayName(element) {
   }
 }
 
+/**
+ * 根据id获得组件的描述
+ * @param {*} id 
+ */
 function describeID(id) {
   var name = ReactComponentTreeHook.getDisplayName(id);
   var element = ReactComponentTreeHook.getElement(id);
@@ -164,6 +191,7 @@ function describeID(id) {
 }
 
 var ReactComponentTreeHook = {
+  // 设置节点的对应关系，父节点的childIDs属性，子节点的parentID属性
   onSetChildren: function (id, nextChildIDs) {
     var item = getItem(id);
     !item ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Item must have been set') : _prodInvariant('144') : void 0;
@@ -184,6 +212,7 @@ var ReactComponentTreeHook = {
       !(nextChild.parentID === id) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Expected onBeforeMountComponent() parent and onSetChildren() to be consistent (%s has parents %s and %s).', nextChildID, nextChild.parentID, id) : _prodInvariant('142', nextChildID, nextChild.parentID, id) : void 0;
     }
   },
+  // 组件加载前，在Map中初始化组件的信息
   onBeforeMountComponent: function (id, element, parentID) {
     var item = {
       element: element,
@@ -195,8 +224,10 @@ var ReactComponentTreeHook = {
     };
     setItem(id, item);
   },
+  // 组件更新前，更新Map中组件的信息
   onBeforeUpdateComponent: function (id, element) {
     var item = getItem(id);
+    // 若组件不存在或已卸载，直接返回
     if (!item || !item.isMounted) {
       // We may end up here as a result of setState() in componentWillUnmount().
       // In this case, ignore the element.
@@ -204,6 +235,8 @@ var ReactComponentTreeHook = {
     }
     item.element = element;
   },
+  // 组件加载后，更新Map中对应组件的信息（isMounted、isRoot）
+  // 若组件为根节点，将id存到Set中
   onMountComponent: function (id) {
     var item = getItem(id);
     !item ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Item must have been set') : _prodInvariant('144') : void 0;
@@ -213,6 +246,7 @@ var ReactComponentTreeHook = {
       addRoot(id);
     }
   },
+  // 组件更新后，更新Map中对应组件的信息（updateCount）
   onUpdateComponent: function (id) {
     var item = getItem(id);
     if (!item || !item.isMounted) {
@@ -222,6 +256,8 @@ var ReactComponentTreeHook = {
     }
     item.updateCount++;
   },
+  // 卸载组件后，更新Map中对应组件的信息（isMounted）
+  // 若组件为根节点，移除Set中的对应id，并将组件id放入到队列中
   onUnmountComponent: function (id) {
     var item = getItem(id);
     if (item) {
@@ -238,6 +274,7 @@ var ReactComponentTreeHook = {
     }
     unmountedIDs.push(id);
   },
+  // 根据unmountedIDs队列，清理Map中已卸载的组件
   purgeUnmountedComponents: function () {
     if (ReactComponentTreeHook._preventPurging) {
       // Should only be used for testing.
@@ -250,10 +287,12 @@ var ReactComponentTreeHook = {
     }
     unmountedIDs.length = 0;
   },
+  // 组件是否已加载
   isMounted: function (id) {
     var item = getItem(id);
     return item ? item.isMounted : false;
   },
+  // 获取当前栈目录
   getCurrentStackAddendum: function (topElement) {
     var info = '';
     if (topElement) {
@@ -268,6 +307,7 @@ var ReactComponentTreeHook = {
     info += ReactComponentTreeHook.getStackAddendumByID(id);
     return info;
   },
+  // 根据id获取栈目录
   getStackAddendumByID: function (id) {
     var info = '';
     while (id) {
@@ -280,6 +320,7 @@ var ReactComponentTreeHook = {
     var item = getItem(id);
     return item ? item.childIDs : [];
   },
+  // 获取组件的显示名
   getDisplayName: function (id) {
     var element = ReactComponentTreeHook.getElement(id);
     if (!element) {
@@ -287,6 +328,7 @@ var ReactComponentTreeHook = {
     }
     return getDisplayName(element);
   },
+  // 更具id获取组件的element属性
   getElement: function (id) {
     var item = getItem(id);
     return item ? item.element : null;
@@ -327,6 +369,7 @@ var ReactComponentTreeHook = {
   getRootIDs: getRootIDs,
   getRegisteredIDs: getItemIDs,
 
+  // 非标准化的报错栈
   pushNonStandardWarningStack: function (isCreatingElement, currentSource) {
     if (typeof console.reactStack !== 'function') {
       return;

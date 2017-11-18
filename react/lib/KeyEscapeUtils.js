@@ -14,6 +14,7 @@
  *
  * @param {string} key to be escaped.
  * @return {string} the escaped key.
+ * 对key值进行换码和包装，以保证可以作为reactid被安全的使用
  */
 
 function escape(key) {
@@ -34,6 +35,7 @@ function escape(key) {
  *
  * @param {string} key to unescape.
  * @return {string} the unescaped key.
+ * 将包装后的key值转换成可阅读的字符串
  */
 function unescape(key) {
   var unescapeRegex = /(=0|=2)/g;

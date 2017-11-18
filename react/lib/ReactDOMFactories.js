@@ -12,6 +12,7 @@ var ReactElement = require('./ReactElement');
 
 /**
  * Create a factory that creates HTML tag elements.
+ * 创建用于生成html标签元素的工厂函数
  *
  * @private
  */

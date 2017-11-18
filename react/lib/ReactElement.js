@@ -18,7 +18,7 @@ var hasOwnProperty = Object.prototype.hasOwnProperty;
 
 var REACT_ELEMENT_TYPE = require('./ReactElementSymbol');
 
-// 定义保留的属性，遍历对象时跳过
+// 保留属性，遍历对象时跳过这些属性名
 var RESERVED_PROPS = {
   key: true,
   ref: true,
@@ -28,7 +28,9 @@ var RESERVED_PROPS = {
 
 var specialPropKeyWarningShown, specialPropRefWarningShown;
 
-// 判断传入的对象是否
+// 4个内部工具函数
+
+// 判断对象config的是否具有有效的ref属性
 function hasValidRef(config) {
   if (process.env.NODE_ENV !== 'production') {
     if (hasOwnProperty.call(config, 'ref')) {
@@ -41,6 +43,7 @@ function hasValidRef(config) {
   return config.ref !== undefined;
 }
 
+// 判断对象config是否具有有效的key属性
 function hasValidKey(config) {
   if (process.env.NODE_ENV !== 'production') {
     if (hasOwnProperty.call(config, 'key')) {
@@ -53,6 +56,7 @@ function hasValidKey(config) {
   return config.key !== undefined;
 }
 
+// 访问key属性时发出警告
 function defineKeyPropWarningGetter(props, displayName) {
   var warnAboutAccessingKey = function () {
     if (!specialPropKeyWarningShown) {
@@ -67,6 +71,7 @@ function defineKeyPropWarningGetter(props, displayName) {
   });
 }
 
+// 访问ref属性时发出警告
 function defineRefPropWarningGetter(props, displayName) {
   var warnAboutAccessingRef = function () {
     if (!specialPropRefWarningShown) {
@@ -87,7 +92,7 @@ function defineRefPropWarningGetter(props, displayName) {
  * will work. Instead test $$typeof field against Symbol.for('react.element') to check
  * if something is a React Element.
  *
- * @param {*} type
+ * @param {*} type 元素类型：原生元素(span, div, h1, ...)，以及ReactElement类型的元素
  * @param {*} key
  * @param {string|object} ref
  * @param {*} self A *temporary* helper to detect places where `this` is
@@ -168,7 +173,7 @@ var ReactElement = function (type, key, ref, self, source, owner, props) {
 /**
  * Create and return a new ReactElement of the given type.
  * See https://facebook.github.io/react/docs/top-level-api.html#react.createelement
- * 根据传入参数创建一个新的ReactElement
+ * 创建新的ReactElement，并返回被创建的ReactElement
  */
 ReactElement.createElement = function (type, config, children) {
   var propName;
@@ -192,6 +197,7 @@ ReactElement.createElement = function (type, config, children) {
     self = config.__self === undefined ? null : config.__self;
     source = config.__source === undefined ? null : config.__source;
     // Remaining properties are added to a new props object
+    // 对于config中的 自有 且 非保留 的属性，传入到新建的对象props中
     for (propName in config) {
       if (hasOwnProperty.call(config, propName) && !RESERVED_PROPS.hasOwnProperty(propName)) {
         props[propName] = config[propName];
@@ -201,6 +207,7 @@ ReactElement.createElement = function (type, config, children) {
 
   // Children can be more than one argument, and those are transferred onto
   // the newly allocated props object.
+  // 参数大于3时，将第3个参数和多余的参数包装成一个数组
   var childrenLength = arguments.length - 2;
   if (childrenLength === 1) {
     props.children = children;
@@ -218,6 +225,7 @@ ReactElement.createElement = function (type, config, children) {
   }
 
   // Resolve default props
+  // 设置默认属性
   if (type && type.defaultProps) {
     var defaultProps = type.defaultProps;
     for (propName in defaultProps) {
@@ -228,6 +236,7 @@ ReactElement.createElement = function (type, config, children) {
   }
   if (process.env.NODE_ENV !== 'production') {
     if (key || ref) {
+      // 属性$$typeof未定义 或 属性$$typeof不为ReactElement类型
       if (typeof props.$$typeof === 'undefined' || props.$$typeof !== REACT_ELEMENT_TYPE) {
         var displayName = typeof type === 'function' ? type.displayName || type.name || 'Unknown' : type;
         if (key) {
@@ -245,6 +254,7 @@ ReactElement.createElement = function (type, config, children) {
 /**
  * Return a function that produces ReactElements of a given type.
  * See https://facebook.github.io/react/docs/top-level-api.html#react.createfactory
+ * 返回一个工厂函数，通过该工厂函数创建的React元素具有type属性值相同
  */
 ReactElement.createFactory = function (type) {
   var factory = ReactElement.createElement.bind(null, type);
@@ -266,6 +276,7 @@ ReactElement.cloneAndReplaceKey = function (oldElement, newKey) {
 /**
  * Clone and return a new ReactElement using element as the starting point.
  * See https://facebook.github.io/react/docs/top-level-api.html#react.cloneelement
+ * 克隆一个React元素，并根据config和children配置替换一些属性
  */
 ReactElement.cloneElement = function (element, config, children) {
   var propName;
@@ -289,6 +300,7 @@ ReactElement.cloneElement = function (element, config, children) {
   if (config != null) {
     if (hasValidRef(config)) {
       // Silently steal the ref from the parent.
+      // 无声的从父类获得ref属性
       ref = config.ref;
       owner = ReactCurrentOwner.current;
     }
@@ -297,6 +309,7 @@ ReactElement.cloneElement = function (element, config, children) {
     }
 
     // Remaining properties override existing props
+    // 剩余的默认属性替换目前存在的属性
     var defaultProps;
     if (element.type && element.type.defaultProps) {
       defaultProps = element.type.defaultProps;
@@ -315,6 +328,7 @@ ReactElement.cloneElement = function (element, config, children) {
 
   // Children can be more than one argument, and those are transferred onto
   // the newly allocated props object.
+  // 同createElement方法
   var childrenLength = arguments.length - 2;
   if (childrenLength === 1) {
     props.children = children;
@@ -335,6 +349,7 @@ ReactElement.cloneElement = function (element, config, children) {
  * @param {?object} object
  * @return {boolean} True if `object` is a valid component.
  * @final
+ * 判断是否是React元素
  */
 ReactElement.isValidElement = function (object) {
   return typeof object === 'object' && object !== null && object.$$typeof === REACT_ELEMENT_TYPE;

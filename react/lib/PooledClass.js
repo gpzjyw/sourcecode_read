@@ -19,7 +19,8 @@ var invariant = require('fbjs/lib/invariant');
  * require accessing the `arguments` object. In each of these, `this` refers to
  * the Class itself, not an instance. If any others are needed, simply add them
  * here, or in their own files.
- * ???
+ * 缓存池，罗列了具有1-4个参数的场景
+ * 此处，this指向类本身，而不是一个实例
  */
 var oneArgumentPooler = function (copyFieldsFrom) {
   var Klass = this;
@@ -65,15 +66,19 @@ var fourArgumentPooler = function (a1, a2, a3, a4) {
   }
 };
 
+// 释放实例
 var standardReleaser = function (instance) {
   var Klass = this;
   !(instance instanceof Klass) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Trying to release an instance into a pool of a different type.') : _prodInvariant('25') : void 0;
+  // 释放实例
   instance.destructor();
   if (Klass.instancePool.length < Klass.poolSize) {
+    // 将释放的实例放入到实例缓存队列中
     Klass.instancePool.push(instance);
   }
 };
 
+// 实例缓存队列的最大长度
 var DEFAULT_POOL_SIZE = 10;
 var DEFAULT_POOLER = oneArgumentPooler;
 
@@ -83,14 +88,15 @@ var DEFAULT_POOLER = oneArgumentPooler;
  * you give this may have a `poolSize` property, and will look for a
  * prototypical `destructor` on instances.
  *
- * @param {Function} CopyConstructor Constructor that can be used to reset.
- * @param {Function} pooler Customizable pooler.
+ * @param {Function} CopyConstructor Constructor that can be used to reset. 类的构造函数
+ * @param {Function} pooler Customizable pooler. 可选的缓存池
+ * 绑定传入函数的缓存池
  */
 var addPoolingTo = function (CopyConstructor, pooler) {
   // Casting as any so that flow ignores the actual implementation and trusts
   // it to match the type we declared
   var NewKlass = CopyConstructor;
-  NewKlass.instancePool = [];
+  NewKlass.instancePool = []; // 初始化实例缓存队列
   NewKlass.getPooled = pooler || DEFAULT_POOLER;
   if (!NewKlass.poolSize) {
     NewKlass.poolSize = DEFAULT_POOL_SIZE;

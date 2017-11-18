@@ -29,6 +29,7 @@ function escapeUserProvidedKey(text) {
  * @constructor ForEachBookKeeping
  * @param {!function} forEachFunction Function to perform traversal with.
  * @param {?*} forEachContext Context to perform context with.
+ * 构造函数，用于存储回调函数、执行上下文、子元素数量
  */
 function ForEachBookKeeping(forEachFunction, forEachContext) {
   this.func = forEachFunction;
@@ -40,8 +41,10 @@ ForEachBookKeeping.prototype.destructor = function () {
   this.context = null;
   this.count = 0;
 };
+// 将构造函数放到缓存池中
 PooledClass.addPoolingTo(ForEachBookKeeping, twoArgumentPooler);
 
+// 执行回调函数
 function forEachSingleChild(bookKeeping, child, name) {
   var func = bookKeeping.func,
       context = bookKeeping.context;
@@ -60,6 +63,8 @@ function forEachSingleChild(bookKeeping, child, name) {
  * @param {?*} children Children tree container.
  * @param {function(*, int)} forEachFunc
  * @param {*} forEachContext Context for forEachContext.
+ * 遍历所有子元素，执行回调函数
+ * 类似于方法 Array.prototype.forEach
  */
 function forEachChildren(children, forEachFunc, forEachContext) {
   if (children == null) {
@@ -104,18 +109,29 @@ function mapSingleChildIntoContext(bookKeeping, child, childKey) {
 
   var mappedChild = func.call(context, child, bookKeeping.count++);
   if (Array.isArray(mappedChild)) {
+    // 匹配到的子元素为数组是，递归遍历
     mapIntoWithKeyPrefixInternal(mappedChild, result, childKey, emptyFunction.thatReturnsArgument);
   } else if (mappedChild != null) {
+    // 函数递归的终点
     if (ReactElement.isValidElement(mappedChild)) {
       mappedChild = ReactElement.cloneAndReplaceKey(mappedChild,
       // Keep both the (mapped) and old keys if they differ, just as
       // traverseAllChildren used to do for objects as children
       keyPrefix + (mappedChild.key && (!child || child.key !== mappedChild.key) ? escapeUserProvidedKey(mappedChild.key) + '/' : '') + childKey);
     }
+    // 将函数运行结果放入数组中
     result.push(mappedChild);
   }
 }
 
+/**
+ * 
+ * @param {*} children 子元素
+ * @param {*} array 保存回调函数执行结果的数组
+ * @param {*} prefix 前缀
+ * @param {*} func 回到函数
+ * @param {*} context 函数执行上下文
+ */
 function mapIntoWithKeyPrefixInternal(children, array, prefix, func, context) {
   var escapedPrefix = '';
   if (prefix != null) {
@@ -138,6 +154,7 @@ function mapIntoWithKeyPrefixInternal(children, array, prefix, func, context) {
  * @param {function(*, int)} func The map function.
  * @param {*} context Context for mapFunction.
  * @return {object} Object containing the ordered map of results.
+ * 类似于方法 Array.prototype.map
  */
 function mapChildren(children, func, context) {
   if (children == null) {
@@ -160,6 +177,7 @@ function forEachSingleChildDummy(traverseContext, child, name) {
  *
  * @param {?*} children Children tree container.
  * @return {number} The number of children.
+ * 在子树中的组件数量
  */
 function countChildren(children, context) {
   return traverseAllChildren(children, forEachSingleChildDummy, null);

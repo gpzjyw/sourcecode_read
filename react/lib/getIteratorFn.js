@@ -27,6 +27,7 @@ var FAUX_ITERATOR_SYMBOL = '@@iterator'; // Before Symbol spec.
  *
  * @param {?object} maybeIterable
  * @return {?function}
+ * 返回遍历器方法
  */
 function getIteratorFn(maybeIterable) {
   var iteratorFn = maybeIterable && (ITERATOR_SYMBOL && maybeIterable[ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL]);

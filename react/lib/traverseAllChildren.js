@@ -40,6 +40,7 @@ var didWarnAboutMaps = false;
  * @param {*} component A component that could contain a manual key.
  * @param {number} index Index that is used if a manual key is not provided.
  * @return {string}
+ * 生成用于标识组件的key字符串
  */
 function getComponentKey(component, index) {
   // Do some typechecking here since we call this blindly. We want to ensure
@@ -53,12 +54,12 @@ function getComponentKey(component, index) {
 }
 
 /**
- * @param {?*} children Children tree container.
- * @param {!string} nameSoFar Name of the key path so far.
+ * @param {?*} children Children tree container. 子树的容器
+ * @param {!string} nameSoFar Name of the key path so far. 目前的key路径
  * @param {!function} callback Callback to invoke with each child found.
  * @param {?*} traverseContext Used to pass information throughout the traversal
  * process.
- * @return {!number} The number of children in this subtree.
+ * @return {!number} The number of children in this subtree. 后代元素的数量
  */
 function traverseAllChildrenImpl(children, nameSoFar, callback, traverseContext) {
   var type = typeof children;
@@ -72,6 +73,8 @@ function traverseAllChildrenImpl(children, nameSoFar, callback, traverseContext)
   // The following is inlined from ReactElement. This means we can optimize
   // some checks. React Fiber also inlines this logic for similar purposes.
   type === 'object' && children.$$typeof === REACT_ELEMENT_TYPE) {
+    // 函数递归的终点
+    // 回调函数传入参数：遍历的上下文，子元素，遍历到当前子元素的key
     callback(traverseContext, children,
     // If it's the only child, treat the name as if it was wrapped in an array
     // so that it's consistent if the number of children grows.
@@ -81,16 +84,18 @@ function traverseAllChildrenImpl(children, nameSoFar, callback, traverseContext)
 
   var child;
   var nextName;
-  var subtreeCount = 0; // Count of children found in the current subtree.
+  var subtreeCount = 0; // Count of children found in the current subtree. 在当前子树中找到的子元素数量
   var nextNamePrefix = nameSoFar === '' ? SEPARATOR : nameSoFar + SUBSEPARATOR;
 
   if (Array.isArray(children)) {
+    // children是数组形式的遍历方式
     for (var i = 0; i < children.length; i++) {
       child = children[i];
       nextName = nextNamePrefix + getComponentKey(child, i);
       subtreeCount += traverseAllChildrenImpl(child, nextName, callback, traverseContext);
     }
   } else {
+    // 采用遍历器遍历children
     var iteratorFn = getIteratorFn(children);
     if (iteratorFn) {
       var iterator = iteratorFn.call(children);
@@ -115,6 +120,7 @@ function traverseAllChildrenImpl(children, nameSoFar, callback, traverseContext)
           didWarnAboutMaps = true;
         }
         // Iterator will provide entry [k,v] tuples rather than values.
+        // 遍历器每次执行后的返回值结构如: [key, value]
         while (!(step = iterator.next()).done) {
           var entry = step.value;
           if (entry) {
@@ -158,9 +164,10 @@ function traverseAllChildrenImpl(children, nameSoFar, callback, traverseContext)
  * the callback might find relevant.
  *
  * @param {?*} children Children tree object.
- * @param {!function} callback To invoke upon traversing each child.
- * @param {?*} traverseContext Context for traversal.
+ * @param {!function} callback To invoke upon traversing each child. 每个子元素执行的回调函数
+ * @param {?*} traverseContext Context for traversal. 子元素执行回调函数的上下文
  * @return {!number} The number of children in this subtree.
+ * 子树中元素的数量
  */
 function traverseAllChildren(children, callback, traverseContext) {
   if (children == null) {
