@@ -10,7 +10,7 @@
 'use strict';
 
 /**
- * 当不处于线上环境时，判断浏览器环境是否可以使用方法Object.defineProperty
+ * 非生产环境时，判断浏览器环境是否可以使用方法Object.defineProperty
  */
 var canDefineProperty = false;
 if (process.env.NODE_ENV !== 'production') {

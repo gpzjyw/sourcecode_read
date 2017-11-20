@@ -19,7 +19,7 @@ var warning = require('fbjs/lib/warning');
 var ReactComponentTreeHook;
 
 if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test') {
-  // Temporary hack.
+  // Temporary hack. 
   // Inline requires don't work well with Jest:
   // https://github.com/facebook/react/issues/7240
   // Remove the inline requires when we don't need them anymore:
@@ -33,10 +33,10 @@ var loggedTypeFailures = {};
  * Assert that the values match with the type specs.
  * Error messages are memorized and will only be shown once.
  *
- * @param {object} typeSpecs Map of name to a ReactPropType
- * @param {object} values Runtime values that need to be type-checked
+ * @param {object} typeSpecs Map of name to a ReactPropType React prop的字典对象
+ * @param {object} values Runtime values that need to be type-checked 需要做类型校验的值
  * @param {string} location e.g. "prop", "context", "child context"
- * @param {string} componentName Name of the component for error messages.
+ * @param {string} componentName Name of the component for error messages. 组件Name，报错时显示
  * @param {?object} element The React element that is being type-checked
  * @param {?number} debugID The React component instance that is being type-checked
  * @private
@@ -48,6 +48,7 @@ function checkReactTypeSpec(typeSpecs, values, location, componentName, element,
       // Prop type validation may throw. In case they do, we don't want to
       // fail the render phase where it didn't fail before. So we log it.
       // After these have been cleaned up, we'll let them throw.
+      // prop类型校验，使用try-catch语句保证校验失败的情况下，依然可以完成render
       try {
         // This is intentionally an invariant that gets caught. It's the same
         // behavior as without this statement except with a better message.

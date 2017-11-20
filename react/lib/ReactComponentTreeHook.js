@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  *
  * 用于构造组件树
+ * 提供了一些获取组件相对应属性的方法
  */
 
 'use strict';

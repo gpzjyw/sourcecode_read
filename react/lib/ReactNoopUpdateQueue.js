@@ -32,7 +32,7 @@ var ReactNoopUpdateQueue = {
    * @return {boolean} True if mounted, false otherwise.
    * @protected
    * @final
-   * 检查组件是否已经装载完成
+   * 检查组件是否已加载
    */
   isMounted: function (publicInstance) {
     return false;

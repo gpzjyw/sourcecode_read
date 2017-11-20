@@ -11,6 +11,9 @@
  * which validates the props passed to the element. This is intended to be
  * used only in DEV and could be replaced by a static type checker for languages
  * that support it.
+ * 
+ * 包装了ReactElement的一些方法，对props进行类型检测，适用于开发环境
+ * 可以用语言静态类型检测的方式代替
  */
 
 'use strict';
@@ -26,6 +29,7 @@ var getIteratorFn = require('./getIteratorFn');
 var warning = require('fbjs/lib/warning');
 var lowPriorityWarning = require('./lowPriorityWarning');
 
+// 获取声明错误信息，书写组件错误
 function getDeclarationErrorAddendum() {
   if (ReactCurrentOwner.current) {
     var name = ReactCurrentOwner.current.getName();
@@ -36,6 +40,7 @@ function getDeclarationErrorAddendum() {
   return '';
 }
 
+// 获取代码错误的信息
 function getSourceInfoErrorAddendum(elementProps) {
   if (elementProps !== null && elementProps !== undefined && elementProps.__source !== undefined) {
     var source = elementProps.__source;
@@ -53,6 +58,7 @@ function getSourceInfoErrorAddendum(elementProps) {
  */
 var ownerHasKeyUseWarning = {};
 
+// 当前组件的错误信息
 function getCurrentComponentErrorInfo(parentType) {
   var info = getDeclarationErrorAddendum();
 
@@ -75,6 +81,7 @@ function getCurrentComponentErrorInfo(parentType) {
  * @internal
  * @param {ReactElement} element Element that requires a key.
  * @param {*} parentType element's parent's type.
+ * 验证key
  */
 function validateExplicitKey(element, parentType) {
   if (!element._store || element._store.validated || element.key != null) {
@@ -84,6 +91,7 @@ function validateExplicitKey(element, parentType) {
 
   var memoizer = ownerHasKeyUseWarning.uniqueKey || (ownerHasKeyUseWarning.uniqueKey = {});
 
+  // 首次创建时才发出警告，children未改变时不发出警告
   var currentComponentErrorInfo = getCurrentComponentErrorInfo(parentType);
   if (memoizer[currentComponentErrorInfo]) {
     return;
@@ -110,6 +118,9 @@ function validateExplicitKey(element, parentType) {
  * @internal
  * @param {ReactNode} node Statically passed child of any type.
  * @param {*} parentType node's parent's type.
+ * 验证children
+ * 单个值时，校验是否为React元素
+ * 多个值时（数组形式或可迭代对象），校验是否有key
  */
 function validateChildKeys(node, parentType) {
   if (typeof node !== 'object') {
@@ -149,6 +160,7 @@ function validateChildKeys(node, parentType) {
  * provided by the type.
  *
  * @param {ReactElement} element
+ * 根据propTypes的定义校验props
  */
 function validatePropTypes(element) {
   var componentClass = element.type;
